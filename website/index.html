@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elite Fitness - 专业健身训练中心</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+
+<body>
+  <nav class="navbar">
+    <div class="logo">Elite Fitness</div>
+    <div class="nav-toggle">
+      <i class="fas fa-bars"></i>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#home">首页</a></li>
+      <li><a href="#about">关于我们</a></li>
+      <li><a href="#courses">课程</a></li>
+      <li><a href="#trainers">教练团队</a></li>
+      <li><a href="#contact">联系我们</a></li>
+    </ul>
+  </nav>
+
+  <section id="home" class="hero">
+    <div class="hero-content">
+      <h1>突破极限，超越自我</h1>
+      <p>专业的健身指导，让你的训练更有效率</p>
+      <a href="#contact" class="cta-button">开始体验</a>
+    </div>
+  </section>
+
+  <section id="about" class="about">
+    <h2>关于我们</h2>
+    <div class="about-content">
+      <div class="about-text">
+        <p>
+          Elite Fitness 致力于为每位会员提供专业的健身指导和个性化的训练计划。
+        </p>
+        <p>
+          我们拥有顶级的设施设备和专业的教练团队，帮助您实现健康和体型目标。
+        </p>
+      </div>
+      <div class="about-stats">
+        <div class="stat">
+          <span class="number">10+</span>
+          <span class="label">年行业经验</span>
+        </div>
+        <div class="stat">
+          <span class="number">50+</span>
+          <span class="label">专业教练</span>
+        </div>
+        <div class="stat">
+          <span class="number">1000+</span>
+          <span class="label">成功案例</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="courses" class="courses">
+    <h2>精品课程</h2>
+    <div class="course-grid">
+      <div class="course-card">
+        <img src="https://api.unsplash.com/random/800x600/?fitness" alt="力量训练" />
+        <h3>力量训练</h3>
+        <p>专业器械指导，科学增肌塑形</p>
+      </div>
+      <div class="course-card">
+        <img src="https://api.unsplash.com/random/800x600/?yoga" alt="瑜伽" />
+        <h3>瑜伽课程</h3>
+        <p>提升身心灵的和谐统一</p>
+      </div>
+      <div class="course-card">
+        <img src="https://api.unsplash.com/random/800x600/?boxing" alt="搏击" />
+        <h3>搏击健身</h3>
+        <p>释放压力，提升自信</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="trainers" class="trainers">
+    <h2>专业教练团队</h2>
+    <div class="trainer-carousel">
+      <button class="carousel-btn prev-btn">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <button class="carousel-btn next-btn">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+      <div class="trainer-slider">
+        <!-- 添加最后一张卡片的复制 -->
+        <div class="trainer-card">
+          <img src="https://source.unsplash.com/random/400x400/?gym-trainer" alt="教练照片" />
+          <h3>Mike Liu</h3>
+          <p>搏击教练 | 体能专家</p>
+        </div>
+        <div class="trainer-card">
+          <img src="https://source.unsplash.com/random/400x400/?trainer" alt="教练照片" />
+          <h3>Alex Wang</h3>
+          <p>私人教练认证 | 营养师认证</p>
+        </div>
+        <div class="trainer-card">
+          <img src="https://source.unsplash.com/random/400x400/?fitness-trainer" alt="教练照片" />
+          <h3>Sarah Chen</h3>
+          <p>瑜伽导师 | 普拉提教练</p>
+        </div>
+        <div class="trainer-card">
+          <img src="https://source.unsplash.com/random/400x400/?gym-trainer" alt="教练照片" />
+          <h3>Mike Liu</h3>
+          <p>搏击教练 | 体能专家</p>
+        </div>
+        <!-- 添加第一张卡片的复制 -->
+        <div class="trainer-card">
+          <img src="https://source.unsplash.com/random/400x400/?trainer" alt="教练照片" />
+          <h3>Alex Wang</h3>
+          <p>私人教练认证 | 营养师认证</p>
+        </div>
+      </div>
+      <div class="carousel-dots"></div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact">
+    <h2>联系我们</h2>
+    <div class="contact-content">
+      <div class="contact-info">
+        <h3>咨询热线</h3>
+        <p><i class="fas fa-phone"></i> 400-888-8888</p>
+        <h3>地址</h3>
+        <p><i class="fas fa-map-marker-alt"></i> 北京市朝阳区未来大厦100号</p>
+        <h3>营业时间</h3>
+        <p><i class="fas fa-clock"></i> 周一至周日 06:00-22:00</p>
+      </div>
+      <form class="contact-form">
+        <input type="text" placeholder="姓名" required />
+        <input type="tel" placeholder="电话" required />
+        <input type="email" placeholder="邮箱" required />
+        <textarea placeholder="留言内容" required></textarea>
+        <button type="submit" class="submit-button">提交咨询</button>
+      </form>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h4>Elite Fitness</h4>
+        <p>专业 | 用心 | 责任</p>
+      </div>
+      <div class="footer-section">
+        <h4>关注我们</h4>
+        <div class="social-links">
+          <a href="#"><i class="fab fa-weixin"></i></a>
+          <a href="#"><i class="fab fa-weibo"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2024 Elite Fitness. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
