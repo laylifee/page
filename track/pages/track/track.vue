@@ -2,16 +2,8 @@
   <view class="track-container">
     <!-- 轨迹地图显示 -->
     <view class="map-wrapper">
-      <map
-        id="map"
-        class="map-container"
-        :latitude="currentLocation.latitude"
-        :longitude="currentLocation.longitude"
-        :markers="markers"
-        :polyline="polyline"
-        scale="16"
-        show-location="true"
-      >
+      <map id="map" class="map-container" :latitude="currentLocation.latitude" :longitude="currentLocation.longitude"
+        :markers="markers" :polyline="polyline" scale="16" show-location="true">
         <view class="map-label">
           <text>轨迹线显示区域</text>
         </view>
@@ -36,18 +28,6 @@
         <text class="btn-icon">■</text>
         <text class="btn-text">停止记录</text>
       </button>
-    </view>
-
-    <!-- 轨迹列表 -->
-    <view class="track-list">
-      <view
-        class="track-item"
-        v-for="item in trackStore.locationList"
-        :key="item.id"
-      >
-        <text>{{ item.latitude }}</text>
-        <text>{{ item.longitude }}</text>
-      </view>
     </view>
   </view>
 </template>

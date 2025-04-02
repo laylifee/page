@@ -2,12 +2,7 @@
   <view class="photo-container">
     <!-- 拍照预览区域 -->
     <view class="photo-preview">
-      <image
-        v-if="previewImage"
-        :src="previewImage"
-        class="preview-image"
-        mode="aspectFill"
-      ></image>
+      <image v-if="previewImage" :src="previewImage" class="preview-image" mode="aspectFill"></image>
       <view v-else class="empty-preview">
         <text class="empty-text">点击下方按钮拍照</text>
       </view>
