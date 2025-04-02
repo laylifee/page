@@ -116,11 +116,31 @@ function focusStayPoint(point, index) {
   };
 
   // 移动地图到该点
-  const mapContext = uni.createMapContext("map");
-  mapContext.moveToLocation({
-    latitude: point.latitude,
-    longitude: point.longitude,
-  });
+  setTimeout(() => {
+    const mapContext = uni.createMapContext("map");
+    if (mapContext && mapContext.moveToLocation) {
+      mapContext.moveToLocation({
+        latitude: point.latitude,
+        longitude: point.longitude,
+        success: () => {
+          console.log("地图已移动到目标位置");
+        },
+        fail: (err) => {
+          console.error("地图移动失败:", err);
+          // 备用方案：使用includePoints方法
+          mapContext.includePoints({
+            points: [
+              {
+                latitude: point.latitude,
+                longitude: point.longitude,
+              },
+            ],
+            padding: [50, 50, 50, 50],
+          });
+        },
+      });
+    }
+  }, 100);
 
   // 高亮显示该点
   uni.showToast({
