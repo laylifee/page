@@ -8,7 +8,8 @@
     <!-- 地图区域 -->
     <view class="map-wrapper">
       <map id="map" class="map-container" :latitude="currentLocation.latitude" :longitude="currentLocation.longitude"
-        :markers="markers" :polyline="polyline" scale="16" show-location="true">
+        :markers="markers" :polyline="polyline" scale="16" :show-location="true" enable-rotate="true"
+        enable-satellite="false" enable-traffic="false" :enable-poi="true" @updated="onMapUpdated">
         <!-- <view class="map-label">
           <text>地图显示区域</text>
         </view> -->
@@ -147,103 +148,6 @@ async function getLocation() {
   }
 }
 
-// 生成模拟轨迹数据
-function generateSimulationData() {
-  // 清空之前的数据
-  simulatedLocations.value = [];
-  simulatedStayPoints.value = [];
-
-  // 从当前位置开始
-  const startLocation = {
-    latitude: currentLocation.value.latitude,
-    longitude: currentLocation.value.longitude,
-    time: new Date(),
-  };
-
-  simulatedLocations.value.push(startLocation);
-
-  // 生成剩余9个点，围绕当前位置移动
-  for (let i = 1; i < 10; i++) {
-    // 随机方向移动 (范围约0.001度，相当于约100米)
-    const latOffset = (Math.random() * 0.002 - 0.001) * i;
-    const lngOffset = (Math.random() * 0.002 - 0.001) * i;
-
-    // 时间间隔，每个点增加1-3分钟
-    const timeOffset = i * (Math.random() * 2 + 1) * 60 * 1000;
-
-    const newLocation = {
-      latitude: startLocation.latitude + latOffset,
-      longitude: startLocation.longitude + lngOffset,
-      time: new Date(startLocation.time.getTime() + timeOffset),
-    };
-
-    simulatedLocations.value.push(newLocation);
-  }
-
-  // 添加停留点
-  addSimulatedStayPoints();
-
-  // 计算总距离和持续时间
-  calculateSimulatedStats();
-
-  // 更新地图标记和路线
-  updateMapMarkers();
-}
-
-// 生成模拟停留点
-function addSimulatedStayPoints() {
-  if (simulatedLocations.value.length < 3) return;
-
-  // 从已有轨迹点中随机选择2-3个点作为停留点
-  const numStayPoints = Math.floor(Math.random() * 2) + 2; // 2-3个停留点
-
-  for (let i = 0; i < numStayPoints; i++) {
-    // 避免选择起点和终点
-    const randomIndex =
-      Math.floor(Math.random() * (simulatedLocations.value.length - 2)) + 1;
-    const baseLocation = simulatedLocations.value[randomIndex];
-
-    // 创建停留点
-    const stayPoint = {
-      latitude: baseLocation.latitude + (Math.random() * 0.0002 - 0.0001),
-      longitude: baseLocation.longitude + (Math.random() * 0.0002 - 0.0001),
-      time: new Date(baseLocation.time.getTime()),
-      duration: Math.floor(Math.random() * 10) + 5, // 5-15分钟停留时间
-    };
-
-    simulatedStayPoints.value.push(stayPoint);
-  }
-}
-
-// 计算模拟轨迹统计数据
-function calculateSimulatedStats() {
-  let totalDistance = 0;
-
-  // 计算总距离
-  for (let i = 1; i < simulatedLocations.value.length; i++) {
-    const prev = simulatedLocations.value[i - 1];
-    const curr = simulatedLocations.value[i];
-
-    totalDistance += calculateDistance(
-      prev.latitude,
-      prev.longitude,
-      curr.latitude,
-      curr.longitude
-    );
-  }
-
-  simulatedDistance.value = totalDistance;
-
-  // 计算总时间（分钟）
-  if (simulatedLocations.value.length >= 2) {
-    const startTime = simulatedLocations.value[0].time;
-    const endTime =
-      simulatedLocations.value[simulatedLocations.value.length - 1].time;
-
-    simulatedDuration.value = Math.round((endTime - startTime) / 1000 / 60);
-  }
-}
-
 // 更新地图标记和路线
 function updateMapMarkers() {
   if (simulatedLocations.value.length === 0) return;
@@ -328,6 +232,132 @@ function updateMapMarkers() {
       width: 4,
     },
   ];
+
+  // 强制地图重新渲染
+  setTimeout(() => {
+    const mapContext = uni.createMapContext("map");
+    if (mapContext && mapContext.moveToLocation) {
+      mapContext.moveToLocation({
+        longitude: currentLocation.value.longitude,
+        latitude: currentLocation.value.latitude,
+        success: () => {
+          console.log("地图重新渲染成功");
+        },
+        fail: (err) => {
+          console.error("地图重新渲染失败:", err);
+        },
+      });
+    }
+  }, 300);
+}
+
+// 生成模拟轨迹数据
+function generateSimulationData() {
+  try {
+    // 清空之前的数据
+    simulatedLocations.value = [];
+    simulatedStayPoints.value = [];
+
+    // 先重置标记和路线，避免地图渲染问题
+    markers.value = [];
+    polyline.value = [];
+
+    // 从当前位置开始
+    const startLocation = {
+      latitude: currentLocation.value.latitude,
+      longitude: currentLocation.value.longitude,
+      time: new Date(),
+    };
+
+    simulatedLocations.value.push(startLocation);
+
+    // 生成剩余9个点，围绕当前位置移动
+    for (let i = 1; i < 10; i++) {
+      // 随机方向移动 (范围约0.001度，相当于约100米)
+      const latOffset = (Math.random() * 0.002 - 0.001) * i;
+      const lngOffset = (Math.random() * 0.002 - 0.001) * i;
+
+      // 时间间隔，每个点增加1-3分钟
+      const timeOffset = i * (Math.random() * 2 + 1) * 60 * 1000;
+
+      const newLocation = {
+        latitude: startLocation.latitude + latOffset,
+        longitude: startLocation.longitude + lngOffset,
+        time: new Date(startLocation.time.getTime() + timeOffset),
+      };
+
+      simulatedLocations.value.push(newLocation);
+    }
+
+    // 添加停留点
+    addSimulatedStayPoints();
+
+    // 计算总距离和持续时间
+    calculateSimulatedStats();
+
+    // 更新地图标记和路线
+    updateMapMarkers();
+  } catch (error) {
+    console.error("生成模拟数据出错:", error);
+    uni.showToast({
+      title: "生成模拟数据出错",
+      icon: "none",
+    });
+  }
+}
+
+// 生成模拟停留点
+function addSimulatedStayPoints() {
+  if (simulatedLocations.value.length < 3) return;
+
+  // 从已有轨迹点中随机选择2-3个点作为停留点
+  const numStayPoints = Math.floor(Math.random() * 2) + 2; // 2-3个停留点
+
+  for (let i = 0; i < numStayPoints; i++) {
+    // 避免选择起点和终点
+    const randomIndex =
+      Math.floor(Math.random() * (simulatedLocations.value.length - 2)) + 1;
+    const baseLocation = simulatedLocations.value[randomIndex];
+
+    // 创建停留点
+    const stayPoint = {
+      latitude: baseLocation.latitude + (Math.random() * 0.0002 - 0.0001),
+      longitude: baseLocation.longitude + (Math.random() * 0.0002 - 0.0001),
+      time: new Date(baseLocation.time.getTime()),
+      duration: Math.floor(Math.random() * 10) + 5, // 5-15分钟停留时间
+    };
+
+    simulatedStayPoints.value.push(stayPoint);
+  }
+}
+
+// 计算模拟轨迹统计数据
+function calculateSimulatedStats() {
+  let totalDistance = 0;
+
+  // 计算总距离
+  for (let i = 1; i < simulatedLocations.value.length; i++) {
+    const prev = simulatedLocations.value[i - 1];
+    const curr = simulatedLocations.value[i];
+
+    totalDistance += calculateDistance(
+      prev.latitude,
+      prev.longitude,
+      curr.latitude,
+      curr.longitude
+    );
+  }
+
+  simulatedDistance.value = totalDistance;
+
+  // 计算总时间（分钟）
+  if (simulatedLocations.value.length >= 2) {
+    const startTime = simulatedLocations.value[0].time;
+    const endTime =
+      simulatedLocations.value[simulatedLocations.value.length - 1].time;
+
+    simulatedDuration.value = Math.round((endTime - startTime) / 1000 / 60);
+  }
 }
 
 // 格式化时间
@@ -362,6 +392,11 @@ function startTrack() {
   uni.switchTab({
     url: "/pages/track/track",
   });
+}
+
+// 地图更新完成事件
+function onMapUpdated(e) {
+  console.log("地图更新完成:", e);
 }
 
 // 页面加载时初始化
