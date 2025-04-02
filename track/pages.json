@@ -1,0 +1,88 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "首页",
+        "navigationBarBackgroundColor": "#4CAF50",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/track/track",
+      "style": {
+        "navigationBarTitleText": "轨迹记录中...",
+        "navigationBarBackgroundColor": "#4CAF50",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/stay/stay",
+      "style": {
+        "navigationBarTitleText": "停留点记录",
+        "navigationBarBackgroundColor": "#4CAF50",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/photo/photo",
+      "style": {
+        "navigationBarTitleText": "拍照记录",
+        "navigationBarBackgroundColor": "#4CAF50",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/user/user",
+      "style": {
+        "navigationBarTitleText": "个人中心",
+        "navigationBarBackgroundColor": "#4CAF50",
+        "navigationBarTextStyle": "white"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "轨迹记录",
+    "navigationBarBackgroundColor": "#4CAF50",
+    "backgroundColor": "#F8F8F8"
+  },
+  "tabBar": {
+    "color": "#7A7E83",
+    "selectedColor": "#4CAF50",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "static/icons/index_unselected.png",
+        "selectedIconPath": "static/icons/index_selected.png"
+      },
+      {
+        "pagePath": "pages/track/track",
+        "text": "轨迹",
+        "iconPath": "static/icons/track_unselected.png",
+        "selectedIconPath": "static/icons/track_selected.png"
+      },
+      {
+        "pagePath": "pages/stay/stay",
+        "text": "停留",
+        "iconPath": "static/icons/stay_unselected.png",
+        "selectedIconPath": "static/icons/stay_selected.png"
+      },
+      {
+        "pagePath": "pages/photo/photo",
+        "text": "拍照",
+        "iconPath": "/static/icons/phone_unselected.png",
+        "selectedIconPath": "static/icons/phone_selected.png"
+      },
+      {
+        "pagePath": "pages/user/user",
+        "text": "我的",
+        "iconPath": "/static/icons/my_unselected.png",
+        "selectedIconPath": "static/icons/my_unselected.png"
+      }
+    ]
+  }
+}
