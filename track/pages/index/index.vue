@@ -297,6 +297,9 @@ function generateSimulationData() {
 
     // 更新地图标记和路线
     updateMapMarkers();
+
+    // 生成多组模拟数据并保存到store
+    saveMultipleSimulationDataToStore();
   } catch (error) {
     console.error("生成模拟数据出错:", error);
     uni.showToast({
@@ -304,6 +307,108 @@ function generateSimulationData() {
       icon: "none",
     });
   }
+}
+
+// 生成多组模拟数据并保存到store
+function saveMultipleSimulationDataToStore() {
+  // 清空历史记录，避免重复保存
+  trackStore.trackHistory = [];
+
+  // 保存当前生成的模拟数据
+  const currentTrackRecord = {
+    id: Date.now().toString(),
+    startTime: simulatedLocations.value[0].time,
+    endTime: simulatedLocations.value[simulatedLocations.value.length - 1].time,
+    locations: [...simulatedLocations.value],
+    stayPoints: [...simulatedStayPoints.value],
+    distance: simulatedDistance.value,
+    duration: simulatedDuration.value,
+  };
+
+  trackStore.trackHistory.unshift(currentTrackRecord);
+
+  // 生成额外的2条历史记录（使用不同的位置和时间）
+  for (let i = 0; i < 2; i++) {
+    const startTime = new Date();
+    startTime.setDate(startTime.getDate() - i - 1); // 前几天的记录
+
+    const locations = [];
+    const stayPoints = [];
+
+    // 基础坐标，微调起始位置
+    const baseLat =
+      currentLocation.value.latitude + (Math.random() * 0.01 - 0.005);
+    const baseLng =
+      currentLocation.value.longitude + (Math.random() * 0.01 - 0.005);
+
+    // 生成10个位置点
+    for (let j = 0; j < 10; j++) {
+      const latOffset = (Math.random() * 0.002 - 0.001) * j;
+      const lngOffset = (Math.random() * 0.002 - 0.001) * j;
+
+      const pointTime = new Date(startTime);
+      pointTime.setMinutes(pointTime.getMinutes() + j * 5);
+
+      locations.push({
+        latitude: baseLat + latOffset,
+        longitude: baseLng + lngOffset,
+        time: pointTime,
+      });
+    }
+
+    // 生成2-3个停留点
+    const numStayPoints = Math.floor(Math.random() * 2) + 2;
+    for (let k = 0; k < numStayPoints; k++) {
+      const randomIndex =
+        Math.floor(Math.random() * (locations.length - 2)) + 1;
+      const baseLocation = locations[randomIndex];
+
+      stayPoints.push({
+        latitude: baseLocation.latitude + (Math.random() * 0.0002 - 0.0001),
+        longitude: baseLocation.longitude + (Math.random() * 0.0002 - 0.0001),
+        time: new Date(baseLocation.time.getTime()),
+        duration: Math.floor(Math.random() * 10) + 5, // 5-15分钟
+      });
+    }
+
+    // 计算总距离
+    let totalDistance = 0;
+    for (let m = 1; m < locations.length; m++) {
+      const prev = locations[m - 1];
+      const curr = locations[m];
+      totalDistance += calculateDistance(
+        prev.latitude,
+        prev.longitude,
+        curr.latitude,
+        curr.longitude
+      );
+    }
+
+    // 计算总时间
+    const endTime = new Date(locations[locations.length - 1].time);
+    const durationMinutes = Math.round((endTime - startTime) / 1000 / 60);
+
+    // 创建历史记录
+    const historyRecord = {
+      id: `history_${Date.now()}_${i}`,
+      startTime: startTime,
+      endTime: endTime,
+      locations: locations,
+      stayPoints: stayPoints,
+      distance: totalDistance.toFixed(2),
+      duration: durationMinutes,
+    };
+
+    trackStore.trackHistory.push(historyRecord);
+  }
+
+  // 保存到本地存储
+  uni.setStorageSync("track_history", JSON.stringify(trackStore.trackHistory));
+
+  uni.showToast({
+    title: "已生成3条模拟记录",
+    icon: "success",
+  });
 }
 
 // 生成模拟停留点
@@ -376,6 +481,22 @@ function formatTime(time) {
 function startTrack() {
   // 如果有模拟数据，加载到store中
   if (simulatedLocations.value.length > 0) {
+    // 创建轨迹记录对象
+    const trackRecord = {
+      id: Date.now().toString(),
+      startTime: simulatedLocations.value[0].time,
+      endTime:
+        simulatedLocations.value[simulatedLocations.value.length - 1].time,
+      locations: [...simulatedLocations.value],
+      stayPoints: [...simulatedStayPoints.value],
+      distance: simulatedDistance.value,
+      duration: simulatedDuration.value,
+    };
+
+    // 添加到历史记录
+    trackStore.trackHistory.unshift(trackRecord);
+
+    // 将模拟数据加载到store当前轨迹中
     trackStore.startTracking();
     simulatedLocations.value.forEach((location) => {
       trackStore.addLocation(location);
@@ -384,6 +505,17 @@ function startTrack() {
     // 添加模拟停留点
     simulatedStayPoints.value.forEach((point) => {
       trackStore.addStayPoint(point);
+    });
+
+    // 保存模拟数据到本地存储
+    uni.setStorageSync(
+      "track_history",
+      JSON.stringify(trackStore.trackHistory)
+    );
+
+    uni.showToast({
+      title: "模拟数据已保存",
+      icon: "success",
     });
   } else {
     trackStore.startTracking();
@@ -402,6 +534,9 @@ function onMapUpdated(e) {
 // 页面加载时初始化
 onMounted(() => {
   getLocation();
+
+  // 加载历史记录
+  trackStore.loadTrackHistory();
 });
 
 // 页面销毁时清理

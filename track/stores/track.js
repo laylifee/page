@@ -67,6 +67,9 @@ export const useTrackStore = defineStore("track", () => {
       );
 
       trackHistory.value.unshift(currentTrack.value);
+
+      // 保存到本地存储
+      saveTrackHistoryToStorage();
     }
 
     // 清空当前轨迹数据
@@ -96,6 +99,52 @@ export const useTrackStore = defineStore("track", () => {
     });
   }
 
+  // 加载历史记录
+  function loadTrackHistory() {
+    try {
+      const historyData = uni.getStorageSync("track_history");
+
+      if (historyData) {
+        const parsedData = JSON.parse(historyData);
+
+        // 处理日期格式
+        parsedData.forEach((track) => {
+          track.startTime = new Date(track.startTime);
+          track.endTime = new Date(track.endTime);
+
+          if (track.locations) {
+            track.locations.forEach((loc) => {
+              if (loc.time) {
+                loc.time = new Date(loc.time);
+              }
+            });
+          }
+
+          if (track.stayPoints) {
+            track.stayPoints.forEach((point) => {
+              if (point.time) {
+                point.time = new Date(point.time);
+              }
+            });
+          }
+        });
+
+        trackHistory.value = parsedData;
+      }
+    } catch (error) {
+      console.error("加载历史记录失败:", error);
+    }
+  }
+
+  // 保存历史记录到本地存储
+  function saveTrackHistoryToStorage() {
+    try {
+      uni.setStorageSync("track_history", JSON.stringify(trackHistory.value));
+    } catch (error) {
+      console.error("保存历史记录失败:", error);
+    }
+  }
+
   // 辅助函数 - 计算两个坐标点之间的距离（千米）
   function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371; // 地球半径，单位千米
@@ -105,9 +154,9 @@ export const useTrackStore = defineStore("track", () => {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(deg2rad(lat1)) *
-        Math.cos(deg2rad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+      Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
@@ -136,5 +185,7 @@ export const useTrackStore = defineStore("track", () => {
     addLocation,
     addStayPoint,
     addPhotoRecord,
+    loadTrackHistory,
+    saveTrackHistoryToStorage,
   };
 });

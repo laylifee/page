@@ -39,6 +39,22 @@
         "navigationBarBackgroundColor": "#4CAF50",
         "navigationBarTextStyle": "white"
       }
+    },
+    {
+      "path": "pages/user/history",
+      "style": {
+        "navigationBarTitleText": "历史记录",
+        "navigationBarBackgroundColor": "#4CAF50",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/user/track-detail",
+      "style": {
+        "navigationBarTitleText": "轨迹详情",
+        "navigationBarBackgroundColor": "#4CAF50",
+        "navigationBarTextStyle": "white"
+      }
     }
   ],
   "globalStyle": {

@@ -1,44 +1,30 @@
 <template>
   <view class="stay-container">
+    <!-- 地图区域 -->
+    <view class="map-wrapper">
+      <map id="map" class="map-container" :latitude="mapCenter.latitude" :longitude="mapCenter.longitude"
+        :markers="markers" scale="16" :show-location="true" @updated="onMapUpdated"></map>
+    </view>
+
     <!-- 停留点列表 -->
-    <view class="stay-list">
-      <view class="list-header">
-        <text class="header-title">停留点记录</text>
-      </view>
-
-      <view v-if="stayPoints.length > 0" class="stay-items">
-        <view
-          v-for="(item, index) in stayPoints"
-          :key="index"
-          class="stay-item"
-        >
-          <view class="stay-icon">
-            <image
-              src="/static/icons/stay_unselected.png"
-              class="icon-image"
-            ></image>
-          </view>
-          <view class="stay-content">
-            <view class="stay-title">
-              {{ item.name || "未命名地点" }}
-            </view>
-            <view class="stay-info">
-              <text class="info-label">停留: </text>
-              <text class="info-value">{{
-                formatDuration(item.duration)
-              }}</text>
-            </view>
-          </view>
-          <view class="stay-time">
-            {{ formatTime(item.startTime) }}
-          </view>
+    <view class="stay-list" v-if="stayPoints.length > 0">
+      <view class="stay-item" v-for="(point, index) in stayPoints" :key="index" @click="focusStayPoint(point, index)">
+        <view class="stay-index">{{ index + 1 }}</view>
+        <view class="stay-info">
+          <text class="stay-position">{{
+        formatPosition(point.latitude, point.longitude)
+      }}</text>
+          <text class="stay-duration">停留 {{ point.duration }} 分钟</text>
         </view>
+        <view class="stay-time">{{ formatTime(point.time) }}</view>
       </view>
+    </view>
 
-      <view v-else class="empty-state">
-        <image src="/static/icons/empty.png" class="empty-icon"></image>
-        <text class="empty-text">暂无停留点记录</text>
-      </view>
+    <!-- 空状态提示 -->
+    <view class="empty-state" v-else>
+      <view class="empty-icon">📍</view>
+      <text class="empty-text">暂无停留点记录</text>
+      <text class="empty-tip">当您在某个位置停留超过5分钟时，系统会自动记录停留点</text>
     </view>
   </view>
 </template>
@@ -46,96 +32,133 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useTrackStore } from "@/stores/track";
-import { chooseLocation } from "@/utils/location";
-
+// import { mockTrackData } from "./mockData";
 const trackStore = useTrackStore();
 
 // 停留点列表
 const stayPoints = computed(() => {
-  // 如果正在记录轨迹中，显示当前轨迹的停留点
+  // 如果正在记录轨迹，则显示当前的停留点
   if (trackStore.isTracking) {
     return trackStore.stayPoints || [];
   }
 
-  // 如果未记录轨迹，显示所有历史轨迹中的停留点
-  const allStayPoints = [];
-  trackStore.trackHistory.forEach((track) => {
-    if (track.stayPoints && track.stayPoints.length) {
-      track.stayPoints.forEach((point) => {
-        allStayPoints.push({
-          ...point,
-          trackId: track.id,
-        });
-      });
-    }
-  });
-
-  // 按时间倒序排列
-  return allStayPoints.sort((a, b) => new Date(b.time) - new Date(a.time));
-});
-
-// 格式化停留时长
-function formatDuration(minutes) {
-  if (!minutes) return "0分钟";
-
-  if (minutes < 60) {
-    return `${minutes}分钟`;
+  // 如果不是记录中，且有历史记录，则获取最近一条历史记录的停留点
+  if (trackStore.trackHistory && trackStore.trackHistory.length > 0) {
+    const latestTrack = trackStore.trackHistory[0];
+    return latestTrack.stayPoints || [];
   }
 
-  const hours = Math.floor(minutes / 60);
-  const remainMinutes = minutes % 60;
+  return [];
+});
 
-  return `${hours}小时${remainMinutes}分钟`;
-}
+// 地图相关数据
+const mapCenter = ref({
+  latitude: 39.9042,
+  longitude: 116.4074,
+});
+
+// 标记点
+const markers = computed(() => {
+  if (!stayPoints.value || stayPoints.value.length === 0) {
+    return [];
+  }
+
+  return stayPoints.value.map((point, index) => ({
+    id: index,
+    latitude: point.latitude,
+    longitude: point.longitude,
+    iconPath: "/static/icon/location-fill.png",
+    width: 25,
+    height: 25,
+    callout: {
+      content: `停留点 ${index + 1}\n${point.duration}分钟`,
+      color: "#ffffff",
+      fontSize: 12,
+      borderRadius: 4,
+      bgColor: "#2196F3",
+      padding: 5,
+      display: "ALWAYS",
+    },
+  }));
+});
 
 // 格式化时间
-function formatTime(time) {
-  if (!time) return "";
+function formatTime(timestamp) {
+  if (!timestamp) return "";
 
-  const date = new Date(time);
-  const hours = date.getHours().toString().padStart(2, "0");
-  const minutes = date.getMinutes().toString().padStart(2, "0");
+  const date = new Date(timestamp);
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
 
   return `${hours}:${minutes}`;
 }
 
-// 添加手动停留点
-async function addStayPoint() {
-  try {
-    const location = await chooseLocation();
+// 格式化坐标位置
+function formatPosition(lat, lng) {
+  if (!lat || !lng) return "未知位置";
 
-    if (location) {
-      trackStore.addStayPoint({
-        ...location,
-        startTime: new Date(),
-        endTime: new Date(),
-        duration: 0,
-        isManual: true,
-      });
-
-      uni.showToast({
-        title: "已添加停留点",
-        icon: "success",
-      });
-    }
-  } catch (err) {
-    console.error("添加停留点失败:", err);
-    uni.showToast({
-      title: "添加停留点失败",
-      icon: "none",
-    });
-  }
+  return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
 }
 
-// 页面导航
-function navigateTo(url) {
-  uni.switchTab({
-    url,
+// 返回上一页
+function goBack() {
+  uni.navigateBack();
+}
+
+// 聚焦到特定停留点
+function focusStayPoint(point, index) {
+  if (!point) return;
+
+  // 更新地图中心
+  mapCenter.value = {
+    latitude: point.latitude,
+    longitude: point.longitude,
+  };
+
+  // 移动地图到该点
+  const mapContext = uni.createMapContext("map");
+  mapContext.moveToLocation({
+    latitude: point.latitude,
+    longitude: point.longitude,
+  });
+
+  // 高亮显示该点
+  uni.showToast({
+    title: `停留点 ${index + 1}`,
+    icon: "none",
   });
 }
 
+// 地图更新完成事件
+function onMapUpdated(e) {
+  console.log("地图更新完成");
+}
+
+// 页面加载时初始化
 onMounted(() => {
-  // 初始化工作
+  // 加载历史记录
+  trackStore.loadTrackHistory();
+
+  if (stayPoints.value && stayPoints.value.length > 0) {
+    // 设置地图中心为第一个停留点
+    const firstPoint = stayPoints.value[0];
+    mapCenter.value = {
+      latitude: firstPoint.latitude,
+      longitude: firstPoint.longitude,
+    };
+
+    // 延时进行地图渲染
+    setTimeout(() => {
+      const mapContext = uni.createMapContext("map");
+      mapContext.includePoints({
+        points: stayPoints.value.map((point) => ({
+          latitude: point.latitude,
+          longitude: point.longitude,
+        })),
+        padding: [80, 80, 80, 80],
+      });
+    }, 500);
+  }
 });
 </script>
 
@@ -145,139 +168,123 @@ onMounted(() => {
   flex-direction: column;
   height: 100vh;
   background-color: #f8f8f8;
-  position: relative;
+
+  .page-header {
+    display: flex;
+    height: 50px;
+    background-color: #4caf50;
+    color: #fff;
+    align-items: center;
+    padding: 0 15px;
+
+    .header-left {
+      width: 40px;
+
+      .back-icon {
+        font-size: 20px;
+        font-weight: bold;
+      }
+    }
+
+    .header-title {
+      flex: 1;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .header-right {
+      width: 40px;
+    }
+  }
+
+  .map-wrapper {
+    height: 40vh;
+    width: 100%;
+
+    .map-container {
+      width: 100%;
+      height: 100%;
+    }
+  }
 
   .stay-list {
     flex: 1;
-    padding-bottom: 60px; // 为底部导航栏预留空间
-
-    .list-header {
-      padding: 15px;
-      background-color: #fff;
-      border-bottom: 1px solid #eee;
-
-      .header-title {
-        font-size: 18px;
-        font-weight: 500;
-        color: #333;
-      }
-    }
-
-    .stay-items {
-      padding: 10px 15px;
-    }
+    overflow-y: auto;
+    background-color: #fff;
+    margin-top: 15px;
 
     .stay-item {
       display: flex;
+      padding: 12px 15px;
+      border-bottom: 1px solid #f5f5f5;
       align-items: center;
-      background-color: #fff;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 10px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
-      .stay-icon {
-        width: 40px;
-        height: 40px;
-        background-color: #e8f5e9;
-        border-radius: 20px;
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .stay-index {
+        width: 24px;
+        height: 24px;
+        border-radius: 12px;
+        background-color: #2196f3;
+        color: #fff;
         display: flex;
         align-items: center;
         justify-content: center;
-
-        .icon-image {
-          width: 24px;
-          height: 24px;
-        }
+        font-size: 12px;
+        margin-right: 10px;
       }
 
-      .stay-content {
+      .stay-info {
         flex: 1;
-        margin-left: 12px;
 
-        .stay-title {
-          font-size: 16px;
-          font-weight: 500;
+        .stay-position {
+          font-size: 14px;
           color: #333;
-          margin-bottom: 4px;
+          margin-bottom: 3px;
+          display: block;
         }
 
-        .stay-info {
-          font-size: 14px;
-          color: #666;
-
-          .info-label {
-            color: #999;
-          }
-
-          .info-value {
-            color: #4caf50;
-            font-weight: 500;
-          }
+        .stay-duration {
+          font-size: 12px;
+          color: #2196f3;
         }
       }
 
       .stay-time {
-        font-size: 14px;
-        color: #999;
-      }
-    }
-
-    .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 50px 20px;
-
-      .empty-icon {
-        width: 80px;
-        height: 80px;
-        margin-bottom: 15px;
-        opacity: 0.5;
-      }
-
-      .empty-text {
-        font-size: 16px;
+        font-size: 12px;
         color: #999;
       }
     }
   }
 
-  .bottom-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 60px;
-    background-color: #fff;
+  .empty-state {
+    flex: 1;
     display: flex;
-    border-top: 1px solid #eee;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
 
-    .tabbar-item {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 5px 0;
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+      color: #ccc;
+    }
 
-      &.active {
-        .tabbar-text {
-          color: #4caf50;
-        }
-      }
+    .empty-text {
+      font-size: 16px;
+      color: #999;
+      margin-bottom: 10px;
+    }
 
-      .tabbar-icon {
-        width: 24px;
-        height: 24px;
-        margin-bottom: 3px;
-      }
-
-      .tabbar-text {
-        font-size: 12px;
-        color: #999;
-      }
+    .empty-tip {
+      font-size: 14px;
+      color: #999;
+      text-align: center;
+      padding: 0 30px;
     }
   }
 }

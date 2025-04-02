@@ -218,7 +218,60 @@ function stopTracking() {
 
 // 页面加载
 onMounted(() => {
-  initTracking();
+  // 加载历史记录
+  trackStore.loadTrackHistory();
+
+  try {
+    // 获取当前位置
+    getCurrentLocation().then((location) => {
+      // 更新地图中心
+      currentLocation.value = {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      };
+    });
+
+    // 如果已有历史数据，显示第一条历史轨迹
+    if (trackStore.trackHistory.length > 0) {
+      // 获取最新的一条历史记录
+      const latestTrack = trackStore.trackHistory[0];
+
+      // 更新位置列表
+      if (latestTrack.locations && latestTrack.locations.length > 0) {
+        // 清空现有数据
+        trackStore.locationList = [];
+
+        // 添加位置点
+        latestTrack.locations.forEach((loc) => {
+          trackStore.addLocation(loc);
+        });
+
+        // 更新当前位置为轨迹起点
+        if (latestTrack.locations.length > 0) {
+          currentLocation.value = {
+            latitude: latestTrack.locations[0].latitude,
+            longitude: latestTrack.locations[0].longitude,
+          };
+        }
+
+        // 如果有停留点，添加到trackStore
+        if (latestTrack.stayPoints && latestTrack.stayPoints.length > 0) {
+          // 清空现有停留点
+          trackStore.stayPoints = [];
+
+          // 添加停留点
+          latestTrack.stayPoints.forEach((point) => {
+            trackStore.addStayPoint(point);
+          });
+        }
+      }
+    } else {
+      // 如果没有历史数据，初始化轨迹记录
+      initTracking();
+    }
+  } catch (err) {
+    console.error("初始化位置失败:", err);
+  }
 });
 
 // 页面卸载
