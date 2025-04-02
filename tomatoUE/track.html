@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>轨迹记录应用原型</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        body {
+            font-family: "Segoe UI", "PingFang SC", sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* 修改容器样式 */
+        .prototype-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+
+        /* 隐藏标题减少占用空间 */
+        .prototype-title {
+            display: none;
+        }
+
+        /* 移除原型区块的固定尺寸 */
+        .prototype-section {
+            margin-bottom: 0;
+        }
+
+        /* 移除标题样式 */
+        .section-title {
+            display: none;
+        }
+
+        .section-title i {
+            margin-right: 10px;
+        }
+
+        /* 缩小手机模拟器尺寸 */
+        .phone-mockup {
+            min-height: 400px;
+            /* 减小高度 */
+            border: 12px solid #222;
+            border-radius: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .phone-mockup:before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: -6px;
+            width: 12px;
+            height: 60px;
+            background: #222;
+            border-radius: 0 5px 5px 0;
+            transform: translateY(-50%);
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #f8f8f8;
+            border-radius: 10px;
+            /* overflow: hidden; */
+            position: relative;
+        }
+
+        .screen-content {
+            padding: 15px;
+            height: 100%;
+            /* overflow-y: auto; */
+        }
+
+        .status-bar {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .map-area {
+            height: 200px;
+            background: linear-gradient(145deg, #e0e0e0, #f5f5f5);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .control-btn {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            box-shadow: 0 4px 8px rgba(66, 133, 244, 0.3);
+            transition: all 0.3s ease;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            width: 100%;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .feature-item {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: #e8f0fe;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: #4285f4;
+        }
+
+        .feature-text {
+            flex: 1;
+        }
+
+        .feature-name {
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+
+        .feature-desc {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .point-list {
+            margin-top: 15px;
+        }
+
+        .point-item {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+        }
+
+        .point-icon {
+            width: 30px;
+            height: 30px;
+            background: #e8f0fe;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            color: #4285f4;
+        }
+
+        /* 新增底部导航栏样式 */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            background: white;
+            padding: 8px 0;
+            border-top: 1px solid #eee;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-item {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .nav-item.active {
+            color: #4285f4;
+        }
+
+        .nav-item i {
+            display: block;
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="prototype-container">
+        <h1 class="prototype-title">轨迹记录应用原型图</h1>
+
+        <!-- 主页面原型 -->
+        <div class="prototype-section">
+            <h2 class="section-title"><i class="fas fa-home"></i> 主页面</h2>
+            <div class="phone-mockup">
+                <div class="phone-screen">
+                    <div class="screen-content">
+                        <div class="status-bar">
+                            <i class="fas fa-map-marker-alt"></i> 当前位置: 北京市
+                        </div>
+                        <div class="map-area">
+                            <i class="fas fa-map" style="font-size: 36px"></i>
+                            <p>地图显示区域</p>
+                        </div>
+                        <button class="control-btn">
+                            <i class="fas fa-play"></i> 开始记录轨迹
+                        </button>
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-route"></i>
+                            </div>
+                            <div class="feature-text">
+                                <div class="feature-name">轨迹记录</div>
+                                <div class="feature-desc">实时记录移动路径</div>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="feature-text">
+                                <div class="feature-name">停留检测</div>
+                                <div class="feature-desc">自动识别停留点</div>
+                            </div>
+                        </div>
+                        <!-- 底部导航栏 -->
+                        <div class="bottom-nav">
+                            <div class="nav-item active">
+                                <i class="fas fa-home"></i>
+                                <span>首页</span>
+                            </div>
+                            <div class="nav-item">
+                                <i class="fas fa-route"></i>
+                                <span>轨迹</span>
+                            </div>
+                            <div class="nav-item">
+                                <i class="fas fa-clock"></i>
+                                <span>停留</span>
+                            </div>
+                            <div class="nav-item">
+                                <i class="fas fa-camera"></i>
+                                <span>拍照</span>
+                            </div>
+                            <div class="nav-item">
+                                <i class="fas fa-user"></i>
+                                <span>我的</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 轨迹记录页面原型 -->
+        <div class="prototype-section">
+            <h2 class="section-title"><i class="fas fa-route"></i> 轨迹记录</h2>
+            <div class="phone-mockup">
+                <div class="phone-screen">
+                    <div class="screen-content">
+                        <div class="status-bar">
+                            <i class="fas fa-route"></i> 轨迹记录中...
+                        </div>
+                        <div class="map-area" style="height: 250px">
+                            <i class="fas fa-map" style="font-size: 36px"></i>
+                            <p>轨迹线显示区域</p>
+                        </div>
+                        <div style="display: flex; margin-bottom: 15px">
+                            <div style="flex: 1; text-align: center">
+                                <div style="font-size: 24px; font-weight: bold">3.2</div>
+                                <div style="font-size: 12px">公里</div>
+                            </div>
+                            <div style="flex: 1; text-align: center">
+                                <div style="font-size: 24px; font-weight: bold">45</div>
+                                <div style="font-size: 12px">分钟</div>
+                            </div>
+                        </div>
+                        <button class="control-btn" style="background: #f44336">
+                            <i class="fas fa-stop"></i> 停止记录
+                        </button>
+                    </div>
+                    <!-- 底部导航栏 -->
+                    <div class="bottom-nav">
+                        <div class="nav-item">
+                            <i class="fas fa-home"></i>
+                            <span>首页</span>
+                        </div>
+                        <div class="nav-item active">
+                            <i class="fas fa-route"></i>
+                            <span>轨迹</span>
+                        </div>
+                        <div class="nav-item">
+                            <i class="fas fa-clock"></i>
+                            <span>停留</span>
+                        </div>
+                        <div class="nav-item">
+                            <i class="fas fa-camera"></i>
+                            <span>拍照</span>
+                        </div>
+                        <div class="nav-item">
+                            <i class="fas fa-user"></i>
+                            <span>我的</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 停留点页面原型 -->
+        <div class="prototype-section">
+            <h2 class="section-title">
+                <i class="fas fa-map-marker-alt"></i> 停留点
+            </h2>
+            <div class="phone-mockup">
+                <div class="phone-screen">
+                    <div class="screen-content">
+                        <div class="status-bar">
+                            <i class="fas fa-clock"></i> 停留点记录
+                        </div>
+                        <div class="point-list">
+                            <div class="point-item">
+                                <div class="point-icon">
+                                    <i class="fas fa-coffee"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 500">星巴克咖啡</div>
+                                    <div style="font-size: 12px; color: #666">停留: 35分钟</div>
+                                </div>
+                            </div>
+                            <div class="point-item">
+                                <div class="point-icon">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 500">海底捞火锅</div>
+                                    <div style="font-size: 12px; color: #666">
+                                        停留: 1小时20分钟
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 底部导航栏 -->
+                    <div class="bottom-nav">
+                        <div class="nav-item">
+                            <i class="fas fa-home"></i>
+                            <span>首页</span>
+                        </div>
+                        <div class="nav-item">
+                            <i class="fas fa-route"></i>
+                            <span>轨迹</span>
+                        </div>
+                        <div class="nav-item active">
+                            <i class="fas fa-clock"></i>
+                            <span>停留</span>
+                        </div>
+                        <div class="nav-item">
+                            <i class="fas fa-camera"></i>
+                            <span>拍照</span>
+                        </div>
+                        <div class="nav-item">
+                            <i class="fas fa-user"></i>
+                            <span>我的</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 拍照功能原型 -->
+        <div class="prototype-section">
+            <h2 class="section-title"><i class="fas fa-camera"></i> 拍照记录</h2>
+            <div class="phone-mockup">
+                <div class="phone-screen">
+                    <div class="screen-content">
+                        <div class="status-bar">
+                            <i class="fas fa-camera"></i> 拍照记录
+                        </div>
+                        <div style="
+                  height: 300px;
+                  background: #333;
+                  border-radius: 8px;
+                  margin-bottom: 15px;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  color: white;
+                ">
+                            <i class="fas fa-camera" style="font-size: 48px"></i>
+                        </div>
+                        <button class="control-btn">
+                            <i class="fas fa-camera"></i> 拍照
+                        </button>
+                        <div style="
+                  margin-top: 15px;
+                  padding: 10px;
+                  background: #f8f8f8;
+                  border-radius: 8px;
+                ">
+                            <div style="font-size: 12px; color: #666">
+                                当前位置: 39.9042°N, 116.4074°E
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 底部导航栏 -->
+                    <div class="bottom-nav">
+                        <div class="nav-item">
+                            <i class="fas fa-home"></i>
+                            <span>首页</span>
+                        </div>
+                        <div class="nav-item">
+                            <i class="fas fa-route"></i>
+                            <span>轨迹</span>
+                        </div>
+                        <div class="nav-item">
+                            <i class="fas fa-clock"></i>
+                            <span>停留</span>
+                        </div>
+                        <div class="nav-item active">
+                            <i class="fas fa-camera"></i>
+                            <span>拍照</span>
+                        </div>
+                        <div class="nav-item">
+                            <i class="fas fa-user"></i>
+                            <span>我的</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 新增"我的"页面原型 -->
+        <div class="prototype-section">
+            <h2 class="section-title"><i class="fas fa-user"></i> 我的页面</h2>
+            <div class="phone-mockup">
+                <div class="phone-screen">
+                    <div class="screen-content">
+                        <div class="status-bar"><i class="fas fa-user"></i> 个人中心</div>
+
+                        <!-- 用户信息卡片 -->
+                        <div style="
+                  background: white;
+                  border-radius: 8px;
+                  padding: 15px;
+                  margin-bottom: 15px;
+                ">
+                            <div style="display: flex; align-items: center">
+                                <div style="
+                      width: 60px;
+                      height: 60px;
+                      background: #e8f0fe;
+                      border-radius: 50%;
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      margin-right: 15px;
+                    ">
+                                    <i class="fas fa-user" style="font-size: 24px; color: #4285f4"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 500; font-size: 16px">用户名</div>
+                                    <div style="font-size: 12px; color: #666">
+                                        会员等级: 普通
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 功能列表 -->
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-history"></i>
+                            </div>
+                            <div class="feature-text">
+                                <div class="feature-name">历史记录</div>
+                            </div>
+                        </div>
+
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-cloud"></i>
+                            </div>
+                            <div class="feature-text">
+                                <div class="feature-name">数据备份</div>
+                            </div>
+                        </div>
+
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <div class="feature-text">
+                                <div class="feature-name">设置</div>
+                            </div>
+                        </div>
+
+                        <!-- 底部导航栏 -->
+                        <div class="bottom-nav">
+                            <div class="nav-item">
+                                <i class="fas fa-home"></i>
+                                <span>首页</span>
+                            </div>
+                            <div class="nav-item">
+                                <i class="fas fa-route"></i>
+                                <span>轨迹</span>
+                            </div>
+                            <div class="nav-item">
+                                <i class="fas fa-clock"></i>
+                                <span>停留</span>
+                            </div>
+                            <div class="nav-item">
+                                <i class="fas fa-camera"></i>
+                                <span>拍照</span>
+                            </div>
+                            <div class="nav-item active">
+                                <i class="fas fa-user"></i>
+                                <span>我的</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
